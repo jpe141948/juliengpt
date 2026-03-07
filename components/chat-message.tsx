@@ -1,6 +1,8 @@
+import { useState } from "react"
 import { ChatMessage } from "@/types/chat"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { Copy, Pencil, RotateCcw, Check } from "lucide-react"
 
 export default function ChatMessageBubble({
                                               message,
@@ -9,19 +11,20 @@ export default function ChatMessageBubble({
                                           }: {
     message: ChatMessage
     onEdit: (id: string, content: string) => void
-    onRegenerate: () => void
+    onRegenerate: (id: string) => void
 }) {
 
     const isUser = message.role === "user"
+    const [editing, setEditing] = useState(false)
+    const [draft, setDraft] = useState(message.content)
 
-    function copy(text: string) {
-        navigator.clipboard.writeText(text)
+    function copy() {
+        navigator.clipboard.writeText(message.content)
     }
 
-    function edit() {
-        const newText = prompt("Edit message", message.content)
-        if (!newText) return
-        onEdit(message.id, newText)
+    function saveEdit() {
+        onEdit(message.id, draft)
+        setEditing(false)
     }
 
     return (
@@ -30,26 +33,48 @@ export default function ChatMessageBubble({
 
             <div className={`max-w-xl px-4 py-3 rounded-lg ${isUser ? "bg-blue-600" : "bg-zinc-800"}`}>
 
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {message.content}
-                </ReactMarkdown>
+                {editing ? (
+                    <textarea
+                        className="w-full bg-transparent outline-none resize-none"
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                    />
+                ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                    </ReactMarkdown>
+                )}
 
-                <div className="flex gap-2 mt-2 text-xs opacity-70">
+                <div className="flex gap-3 mt-2 text-zinc-400">
 
-                    <button onClick={() => copy(message.content)}>
-                        Copy
-                    </button>
+                    <Copy
+                        size={16}
+                        className="cursor-pointer hover:text-white"
+                        onClick={copy}
+                    />
 
-                    {isUser && (
-                        <button onClick={edit}>
-                            Edit
-                        </button>
+                    {isUser && !editing && (
+                        <Pencil
+                            size={16}
+                            className="cursor-pointer hover:text-white"
+                            onClick={() => setEditing(true)}
+                        />
+                    )}
+
+                    {editing && (
+                        <Check
+                            size={16}
+                            className="cursor-pointer hover:text-white"
+                            onClick={saveEdit}
+                        />
                     )}
 
                     {!isUser && (
-                        <button onClick={onRegenerate}>
-                            Regenerate
-                        </button>
+                        <RotateCcw
+                            size={16}
+                            className="cursor-pointer hover:text-white"
+                            onClick={() => onRegenerate(message.id)}
+                        />
                     )}
 
                 </div>

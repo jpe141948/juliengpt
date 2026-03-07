@@ -71,28 +71,37 @@ export default function ChatPage() {
         setSending(false)
     }
 
-    async function regenerate() {
+    async function regenerate(id: string) {
 
-        const lastUserIndex = [...messages].reverse().findIndex(m => m.role === "user")
+        const index = messages.findIndex(m => m.id === id)
 
-        if (lastUserIndex === -1) return
+        if (index === -1) return
 
-        const userMessage = messages[messages.length - 2]?.content
+        const userMsg = messages[index - 1]
 
-        const trimmed = messages.slice(0, messages.length - 1)
+        if (!userMsg) return
+
+        const trimmed = messages.slice(0, index)
 
         setMessages(trimmed)
 
-        sendMessage(userMessage)
+        sendMessage(userMsg.content)
     }
 
     function editMessage(id: string, content: string) {
 
-        const updated = messages.map(m =>
-            m.id === id ? { ...m, content } : m
-        )
+        const index = messages.findIndex(m => m.id === id)
+
+        if (index === -1) return
+
+        const updated = [
+            ...messages.slice(0, index),
+            { ...messages[index], content }
+        ]
 
         setMessages(updated)
+
+        sendMessage(content)
     }
 
     async function sendMessage(customMessage?: string) {
@@ -251,13 +260,21 @@ export default function ChatPage() {
               }}
           />
 
-                    <button
-                        onClick={() => sendMessage()}
-                        disabled={sending}
-                        className="bg-blue-600 px-4 py-2 rounded"
-                    >
-                        Send
-                    </button>
+                    {sending ? (
+                        <button
+                            onClick={stopGeneration}
+                            className="bg-red-600 px-4 py-2 rounded"
+                        >
+                            Stop
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => sendMessage()}
+                            className="bg-blue-600 px-4 py-2 rounded"
+                        >
+                            Send
+                        </button>
+                    )}
 
                 </div>
 

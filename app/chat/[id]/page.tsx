@@ -73,19 +73,26 @@ export default function ChatPage() {
 
     async function regenerate(id: string) {
 
-        const index = messages.findIndex(m => m.id === id)
+        const assistantIndex = messages.findIndex(m => m.id === id)
 
-        if (index === -1) return
+        if (assistantIndex === -1) return
 
-        const userMsg = messages[index - 1]
+        const userMessage = messages[assistantIndex - 1]
 
-        if (!userMsg) return
+        if (!userMessage) return
 
-        const trimmed = messages.slice(0, index)
+        const trimmed = messages.slice(0, assistantIndex)
 
         setMessages(trimmed)
 
-        sendMessage(userMsg.content)
+        const history = trimmed
+            .filter(m => m.role !== "assistant" || m.content !== "")
+            .map(m => ({
+                role: m.role,
+                content: m.content
+            }))
+
+        generateFromHistory(history.slice(-20))
     }
 
     function editMessage(id: string, content: string) {
@@ -94,14 +101,19 @@ export default function ChatPage() {
 
         if (index === -1) return
 
-        const updated = [
+        const trimmed = [
             ...messages.slice(0, index),
             { ...messages[index], content }
         ]
 
-        setMessages(updated)
+        setMessages(trimmed)
 
-        sendMessage(content)
+        const history = trimmed.map(m => ({
+            role: m.role,
+            content: m.content
+        }))
+
+        generateFromHistory(history.slice(-20))
     }
 
     async function sendMessage(customMessage?: string) {
@@ -199,6 +211,71 @@ export default function ChatPage() {
         setSending(false)
     }
 
+    async function generateFromHistory(history: any[]) {
+
+        if (sending) return
+
+        setSending(true)
+
+        abortRef.current = new AbortController()
+
+        const res = await fetch("/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: history,
+                model,
+                conversationId
+            }),
+            signal: abortRef.current.signal
+        })
+
+        const reader = res.body?.getReader()
+        const decoder = new TextDecoder()
+
+        let assistantText = ""
+        const assistantId = uuid()
+
+        setMessages(prev => [
+            ...prev,
+            { id: assistantId, role: "assistant", content: "" }
+        ])
+
+        while (true) {
+
+            const { done, value } = await reader!.read()
+
+            if (done) break
+
+            const chunk = decoder.decode(value)
+
+            assistantText += chunk
+
+            setMessages(prev => {
+
+                const updated = [...prev]
+
+                const index = updated.findIndex(m => m.id === assistantId)
+
+                if (index !== -1) {
+                    updated[index] = {
+                        ...updated[index],
+                        content: assistantText
+                    }
+                }
+
+                return updated
+            })
+        }
+
+        await supabase.from("messages").insert({
+            conversation_id: conversationId,
+            role: "assistant",
+            content: assistantText
+        })
+
+        setSending(false)
+    }
+
     return (
         <div className="flex h-screen">
 
@@ -228,19 +305,23 @@ export default function ChatPage() {
 
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 px-6 py-6">
 
-                    <Virtuoso
-                        data={messages}
-                        itemContent={(index, msg) => (
-                            <ChatMessageBubble
-                                key={msg.id}
-                                message={msg}
-                                onEdit={editMessage}
-                                onRegenerate={regenerate}
-                            />
-                        )}
-                    />
+                    <div className="max-w-4xl mx-auto h-full">
+
+                        <Virtuoso
+                            data={messages}
+                            itemContent={(index, msg) => (
+                                <ChatMessageBubble
+                                    key={msg.id}
+                                    message={msg}
+                                    onEdit={editMessage}
+                                    onRegenerate={regenerate}
+                                />
+                            )}
+                        />
+
+                    </div>
 
                 </div>
 

@@ -1,7 +1,26 @@
 import { openai } from "@/lib/openai"
 import { createClient } from "@supabase/supabase-js"
+import { createClient as createServerClient } from "@/lib/supabase/server"
 
 export async function POST(req: Request) {
+
+    const supabaseAuth = await createServerClient()
+
+    const {
+        data: { user }
+    } = await supabaseAuth.auth.getUser()
+
+    if (!user) {
+        return new Response("Unauthorized", { status: 401 })
+    }
+
+    const allowedUsers = [
+        "peters.julien@icloud.com"
+    ]
+
+    if (!allowedUsers.includes(user.email!)) {
+        return new Response("Access denied", { status: 403 })
+    }
 
     const { messages, model, conversationId } = await req.json()
 

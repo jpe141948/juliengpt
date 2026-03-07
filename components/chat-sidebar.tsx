@@ -15,6 +15,7 @@ export default function ChatSidebar() {
     const router = useRouter()
 
     const [conversations, setConversations] = useState<Conversation[]>([])
+    const [search, setSearch] = useState("")
 
     async function loadConversations() {
 
@@ -76,10 +77,14 @@ export default function ChatSidebar() {
         loadConversations()
     }
 
+    const filtered = conversations.filter(c =>
+        c.title?.toLowerCase().includes(search.toLowerCase())
+    )
+
     return (
         <div className="w-64 bg-zinc-900 h-full flex flex-col">
 
-            <div className="p-4 border-b border-zinc-800">
+            <div className="p-4 border-b border-zinc-800 flex flex-col gap-3">
 
                 <button
                     onClick={newChat}
@@ -88,11 +93,18 @@ export default function ChatSidebar() {
                     New Chat
                 </button>
 
+                <input
+                    placeholder="Search chats..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="p-2 rounded bg-zinc-800 text-sm"
+                />
+
             </div>
 
             <div className="flex-1 overflow-y-auto">
 
-                {conversations.map((chat) => (
+                {filtered.map((chat) => (
 
                     <div
                         key={chat.id}

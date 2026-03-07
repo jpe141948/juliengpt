@@ -7,6 +7,7 @@ import ChatSidebar from "@/components/chat-sidebar"
 import { ChatMessage } from "@/types/chat"
 import { createClient } from "@/lib/supabase/client"
 import { v4 as uuid } from "uuid"
+import { Virtuoso } from "react-virtuoso"
 
 export default function ChatPage() {
 
@@ -26,7 +27,7 @@ export default function ChatPage() {
     const [messagesLoaded, setMessagesLoaded] = useState(false)
     const [initialSent, setInitialSent] = useState(false)
 
-    const bottomRef = useRef<HTMLDivElement>(null)
+    const abortRef = useRef<AbortController | null>(null)
 
     useEffect(() => {
         loadMessages()
@@ -65,15 +66,41 @@ export default function ChatPage() {
         setMessagesLoaded(true)
     }
 
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-    }, [messages])
+    function stopGeneration() {
+        abortRef.current?.abort()
+        setSending(false)
+    }
+
+    async function regenerate() {
+
+        const lastUserIndex = [...messages].reverse().findIndex(m => m.role === "user")
+
+        if (lastUserIndex === -1) return
+
+        const userMessage = messages[messages.length - 2]?.content
+
+        const trimmed = messages.slice(0, messages.length - 1)
+
+        setMessages(trimmed)
+
+        sendMessage(userMessage)
+    }
+
+    function editMessage(id: string, content: string) {
+
+        const updated = messages.map(m =>
+            m.id === id ? { ...m, content } : m
+        )
+
+        setMessages(updated)
+    }
 
     async function sendMessage(customMessage?: string) {
 
         const messageToSend = customMessage ?? input
 
         if (!messageToSend.trim() || sending) return
+
         setSending(true)
 
         const userMessage = messageToSend
@@ -95,15 +122,6 @@ export default function ChatPage() {
             content: userMessage
         })
 
-        if (messages.length === 0) {
-            await supabase
-                .from("conversations")
-                .update({
-                    title: userMessage.slice(0, 40)
-                })
-                .eq("id", conversationId)
-        }
-
         const history = [
             ...messages,
             { role: "user", content: userMessage }
@@ -111,13 +129,16 @@ export default function ChatPage() {
 
         const limitedHistory = history.slice(-20)
 
+        abortRef.current = new AbortController()
+
         const res = await fetch("/api/chat", {
             method: "POST",
             body: JSON.stringify({
                 messages: limitedHistory,
                 model,
                 conversationId
-            })
+            }),
+            signal: abortRef.current.signal
         })
 
         const reader = res.body?.getReader()
@@ -142,7 +163,9 @@ export default function ChatPage() {
             assistantText += chunk
 
             setMessages(prev => {
+
                 const updated = [...prev]
+
                 const index = updated.findIndex(m => m.id === assistantId)
 
                 if (index !== -1) {
@@ -183,43 +206,55 @@ export default function ChatPage() {
                     >
                         <option value="gpt-5">GPT-5</option>
                         <option value="gpt-5-mini">GPT-5-mini</option>
-                        <option value="gpt-5.4">GPT-5.4</option>
                     </select>
+
+                    {sending && (
+                        <button
+                            onClick={stopGeneration}
+                            className="bg-red-600 px-3 py-2 rounded"
+                        >
+                            Stop
+                        </button>
+                    )}
 
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+                <div className="flex-1">
 
-                    {messages.map((msg) => (
-                        <ChatMessageBubble key={msg.id} message={msg} />
-                    ))}
-
-                    <div ref={bottomRef} />
+                    <Virtuoso
+                        data={messages}
+                        itemContent={(index, msg) => (
+                            <ChatMessageBubble
+                                key={msg.id}
+                                message={msg}
+                                onEdit={editMessage}
+                                onRegenerate={regenerate}
+                            />
+                        )}
+                    />
 
                 </div>
 
                 <div className="border-t border-zinc-800 p-4 flex gap-2">
 
-                    <textarea
-                        className="flex-1 p-3 bg-zinc-800 rounded resize-none"
-                        rows={1}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Send a message..."
-                        onKeyDown={(e) => {
-
-                            if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault()
-                                sendMessage()
-                            }
-
-                        }}
-                    />
+          <textarea
+              className="flex-1 p-3 bg-zinc-800 rounded resize-none"
+              rows={1}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Send a message..."
+              onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      sendMessage()
+                  }
+              }}
+          />
 
                     <button
                         onClick={() => sendMessage()}
                         disabled={sending}
-                        className="bg-blue-600 px-4 py-2 rounded disabled:opacity-50"
+                        className="bg-blue-600 px-4 py-2 rounded"
                     >
                         Send
                     </button>

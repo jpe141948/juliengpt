@@ -10,7 +10,11 @@ export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [loading, setLoading] = useState(false)
 
+    const [cooldown, setCooldown] = useState(false)
+
     async function signIn() {
+
+        if (cooldown) return
 
         setLoading(true)
 
@@ -30,6 +34,11 @@ export default function LoginPage() {
         }
 
         setLoading(false)
+        setCooldown(true)
+
+        setTimeout(() => {
+            setCooldown(false)
+        }, 60000)
 
         alert("Check your email for the login link.")
     }

@@ -15,11 +15,16 @@ export async function POST(req: Request) {
         content: "You are a helpful assistant. Be concise and accurate."
     }
 
+    const cleanMessages = messages.map((m: any) => ({
+        role: m.role,
+        content: m.content
+    }))
+
     const response = await openai.responses.create({
         model: model || "gpt-5",
         input: [
             systemPrompt,
-            ...messages
+            ...cleanMessages
         ],
         stream: true
     })

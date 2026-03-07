@@ -2,29 +2,24 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
 
     const supabase = createClient()
+    const router = useRouter()
 
     const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
 
-    const [cooldown, setCooldown] = useState(false)
-
-    async function signIn() {
-
-        if (cooldown) return
+    async function login() {
 
         setLoading(true)
 
-        const redirectTo = `${window.location.origin}/auth/callback`
-
-        const { error } = await supabase.auth.signInWithOtp({
+        const { error } = await supabase.auth.signInWithPassword({
             email,
-            options: {
-                emailRedirectTo: redirectTo
-            }
+            password
         })
 
         if (error) {
@@ -33,14 +28,25 @@ export default function LoginPage() {
             return
         }
 
-        setLoading(false)
-        setCooldown(true)
+        router.push("/")
+    }
 
-        setTimeout(() => {
-            setCooldown(false)
-        }, 60000)
+    async function signup() {
 
-        alert("Check your email for the login link.")
+        setLoading(true)
+
+        const { error } = await supabase.auth.signUp({
+            email,
+            password
+        })
+
+        if (error) {
+            alert(error.message)
+            setLoading(false)
+            return
+        }
+
+        router.push("/")
     }
 
     return (
@@ -50,7 +56,7 @@ export default function LoginPage() {
             <div className="flex flex-col gap-4 w-80">
 
                 <h1 className="text-2xl font-bold">
-                    Sign in
+                    Login
                 </h1>
 
                 <input
@@ -60,17 +66,32 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                 />
 
+                <input
+                    type="password"
+                    className="p-2 rounded bg-zinc-800"
+                    placeholder="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
                 <button
-                    onClick={signIn}
+                    onClick={login}
                     disabled={loading}
                     className="bg-blue-600 p-2 rounded"
                 >
-                    Sign in
+                    Login
+                </button>
+
+                <button
+                    onClick={signup}
+                    disabled={loading}
+                    className="bg-zinc-700 p-2 rounded"
+                >
+                    Create Account
                 </button>
 
             </div>
 
         </div>
-
     )
 }

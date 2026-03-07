@@ -27,36 +27,74 @@ export default function ChatMessageBubble({
         setEditing(false)
     }
 
-    return (
+    if (!isUser) {
+        return (
+            <div className="w-full flex justify-center py-6">
 
-        <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+                <div className="max-w-3xl w-full text-[15px] leading-relaxed">
 
-            <div className={`max-w-xl px-4 py-3 rounded-lg ${isUser ? "bg-blue-600" : "bg-zinc-800"}`}>
-
-                {editing ? (
-                    <textarea
-                        className="w-full bg-transparent outline-none resize-none"
-                        value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
-                    />
-                ) : (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {message.content}
                     </ReactMarkdown>
-                )}
 
-                <div className="flex gap-3 mt-2 text-zinc-400">
+                    <div className="flex gap-3 mt-3 text-[#EAD9B7] opacity-60 hover:opacity-100 transition">
+
+                        <Copy
+                            size={16}
+                            className="cursor-pointer"
+                            onClick={copy}
+                        />
+
+                        <RotateCcw
+                            size={16}
+                            className="cursor-pointer"
+                            onClick={() => onRegenerate(message.id)}
+                        />
+
+                    </div>
+
+                </div>
+
+            </div>
+        )
+    }
+
+    return (
+
+        <div className="w-full flex justify-end py-6">
+
+            <div className="max-w-xl">
+
+                <div
+                    className={`px-4 py-3 rounded-xl bg-[#1A3F38] text-[#F7E7CE]`}
+                >
+
+                    {editing ? (
+                        <textarea
+                            className="w-full bg-[#214B42] p-2 rounded outline-none border border-[#C9B08B] resize-none"
+                            value={draft}
+                            onChange={(e) => setDraft(e.target.value)}
+                        />
+                    ) : (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                        </ReactMarkdown>
+                    )}
+
+                </div>
+
+                <div className="flex gap-3 mt-2 text-[#EAD9B7] opacity-60 hover:opacity-100 transition">
 
                     <Copy
                         size={16}
-                        className="cursor-pointer hover:text-white"
+                        className="cursor-pointer"
                         onClick={copy}
                     />
 
-                    {isUser && !editing && (
+                    {!editing && (
                         <Pencil
                             size={16}
-                            className="cursor-pointer hover:text-white"
+                            className="cursor-pointer"
                             onClick={() => setEditing(true)}
                         />
                     )}
@@ -64,16 +102,8 @@ export default function ChatMessageBubble({
                     {editing && (
                         <Check
                             size={16}
-                            className="cursor-pointer hover:text-white"
+                            className="cursor-pointer"
                             onClick={saveEdit}
-                        />
-                    )}
-
-                    {!isUser && (
-                        <RotateCcw
-                            size={16}
-                            className="cursor-pointer hover:text-white"
-                            onClick={() => onRegenerate(message.id)}
                         />
                     )}
 

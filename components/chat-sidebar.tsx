@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { Trash2, Plus } from "lucide-react"
 
 type Conversation = {
     id: string
@@ -82,14 +83,16 @@ export default function ChatSidebar() {
     )
 
     return (
-        <div className="w-64 bg-zinc-900 h-full flex flex-col">
 
-            <div className="p-4 border-b border-zinc-800 flex flex-col gap-3">
+        <div className="w-64 bg-[#1A3F38] h-full flex flex-col border-r border-[#214B42]">
+
+            <div className="p-4 flex flex-col gap-3">
 
                 <button
                     onClick={newChat}
-                    className="w-full bg-blue-600 p-2 rounded"
+                    className="flex items-center justify-center gap-2 bg-[#C9B08B] text-[#102C26] p-2 rounded-lg hover:opacity-90 transition"
                 >
+                    <Plus size={16} />
                     New Chat
                 </button>
 
@@ -97,7 +100,7 @@ export default function ChatSidebar() {
                     placeholder="Search chats..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="p-2 rounded bg-zinc-800 text-sm"
+                    className="w-full bg-[#214B42] text-[#F7E7CE] p-2 rounded-lg text-sm outline-none placeholder:text-[#EAD9B7]"
                 />
 
             </div>
@@ -108,22 +111,21 @@ export default function ChatSidebar() {
 
                     <div
                         key={chat.id}
-                        className="flex items-center justify-between p-3 hover:bg-zinc-800"
+                        className="flex items-center justify-between px-4 py-3 hover:bg-[#214B42] cursor-pointer transition"
                     >
 
             <span
                 onClick={() => router.push(`/chat/${chat.id}`)}
-                className="cursor-pointer flex-1 truncate"
+                className="flex-1 truncate text-sm text-[#F7E7CE]"
             >
               {chat.title || "New Chat"}
             </span>
 
-                        <button
+                        <Trash2
+                            size={16}
                             onClick={() => deleteChat(chat.id)}
-                            className="text-red-400 text-sm ml-2"
-                        >
-                            ×
-                        </button>
+                            className="text-[#EAD9B7] opacity-60 hover:opacity-100 cursor-pointer transition"
+                        />
 
                     </div>
 
@@ -132,5 +134,6 @@ export default function ChatSidebar() {
             </div>
 
         </div>
+
     )
 }

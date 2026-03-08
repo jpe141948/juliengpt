@@ -63,7 +63,8 @@ export default function ChatPage() {
         const formatted: ChatMessage[] = data.map((m) => ({
             id: m.id,
             role: m.role,
-            content: m.content
+            content: m.content,
+            attachments: m.attachments || []
         }))
 
         setMessages(formatted)
@@ -130,9 +131,18 @@ export default function ChatPage() {
 
         const userMessage = messageToSend
 
+        const attachments = files.map(file => ({
+            url: URL.createObjectURL(file)
+        }))
+
         const newMessages: ChatMessage[] = [
             ...messages,
-            { id: uuid(), role: "user", content: userMessage }
+            {
+                id: uuid(),
+                role: "user",
+                content: userMessage,
+                attachments
+            }
         ]
 
         setMessages(newMessages)
@@ -298,7 +308,7 @@ export default function ChatPage() {
 
                 <div className="flex-1 px-10 py-8 overflow-hidden">
 
-                    <div className="max-w-3xl mx-auto h-full">
+                    <div className="max-w-5xl mx-auto h-full">
 
                         <Virtuoso
                             data={messages}

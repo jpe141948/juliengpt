@@ -45,15 +45,18 @@ export async function POST(req: Request) {
     }))
     const imageInputs = await Promise.all(
         files.map(async (file) => {
+
             const buffer = Buffer.from(await file.arrayBuffer())
             const base64 = buffer.toString("base64")
+
+            const mime = file.type || "image/png"
 
             return {
                 role: "user",
                 content: [
                     {
                         type: "input_image",
-                        image_base64: base64
+                        image_url: `data:${mime};base64,${base64}`
                     }
                 ]
             }

@@ -171,11 +171,6 @@ export default function ChatPage() {
 
         setMessages(newMessages)
 
-        if (!customMessage) {
-            setInput("")
-            setFiles([])
-        }
-
         await supabase.from("messages").insert({
             conversation_id: conversationId,
             role: "user",
@@ -255,6 +250,8 @@ export default function ChatPage() {
         window.dispatchEvent(new Event("chat-updated"))
 
         setSending(false)
+        setInput("")
+        setFiles([])
     }
 
     async function generateFromHistory(history: any[]) {

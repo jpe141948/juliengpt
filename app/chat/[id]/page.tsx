@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client"
 import { v4 as uuid } from "uuid"
 import { Virtuoso } from "react-virtuoso"
 import { Paperclip } from "lucide-react"
+import ChatInput from "@/components/chat-input"
 
 export default function ChatPage() {
 
@@ -315,70 +316,17 @@ export default function ChatPage() {
 
                 </div>
 
-                <div className="border-t border-[#214B42] bg-[#1A3F38] p-5">
-
-                    <div className="flex items-center gap-3 bg-[#214B42] rounded-xl px-4 py-3">
-
-                        <select
-                            value={model}
-                            onChange={(e) => setModel(e.target.value)}
-                            className="bg-transparent text-[#F7E7CE] text-sm outline-none"
-                        >
-                            <option value="gpt-5">GPT-5</option>
-                            <option value="gpt-5-mini">GPT-5 mini</option>
-                        </select>
-
-                        <input
-                            type="file"
-                            multiple
-                            className="hidden"
-                            id="file-upload"
-                            onChange={(e) => {
-                                if (!e.target.files) return
-                                setFiles(Array.from(e.target.files))
-                            }}
-                        />
-
-                        <label
-                            htmlFor="file-upload"
-                            className="cursor-pointer text-[#F7E7CE] hover:opacity-70"
-                        >
-                            <Paperclip size={18} />
-                        </label>
-
-                        <textarea
-                            className="flex-1 bg-transparent text-[#F7E7CE] resize-none outline-none"
-                            rows={1}
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Type your message..."
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault()
-                                    sendMessage()
-                                }
-                            }}
-                        />
-
-                        {sending ? (
-                            <button
-                                onClick={stopGeneration}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                            >
-                                Stop
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => sendMessage()}
-                                className="bg-[#C9B08B] text-[#102C26] px-4 py-2 rounded-lg hover:opacity-90"
-                            >
-                                ↑
-                            </button>
-                        )}
-
-                    </div>
-
-                </div>
+                <ChatInput
+                    input={input}
+                    setInput={setInput}
+                    model={model}
+                    setModel={setModel}
+                    files={files}
+                    setFiles={setFiles}
+                    sending={sending}
+                    onSend={() => sendMessage()}
+                    onStop={stopGeneration}
+                />
 
             </div>
 

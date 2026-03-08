@@ -46,7 +46,7 @@ export default function HomePage() {
 
     return (
 
-        <div className="flex h-screen">
+        <div className="app-shell flex">
 
             <ChatSidebar/>
 

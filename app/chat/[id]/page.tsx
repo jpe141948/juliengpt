@@ -277,7 +277,7 @@ export default function ChatPage() {
     }
 
     return (
-        <div className="flex h-screen">
+        <div className="app-shell flex">
 
             <ChatSidebar />
 
@@ -305,9 +305,9 @@ export default function ChatPage() {
 
                 </div>
 
-                <div className="flex-1 px-6 py-6">
+                <div className="flex-1 px-10 py-8 overflow-hidden">
 
-                    <div className="max-w-4xl mx-auto h-full">
+                    <div className="max-w-3xl mx-auto h-full">
 
                         <Virtuoso
                             data={messages}
@@ -325,10 +325,10 @@ export default function ChatPage() {
 
                 </div>
 
-                <div className="border-t border-zinc-800 p-4 flex gap-2">
+                <div className="border-t border-[#214B42] bg-[#1A3F38] p-5 flex gap-3">
 
           <textarea
-              className="flex-1 p-3 bg-zinc-800 rounded resize-none"
+              className="flex-1 p-3 bg-[#214B42] text-[#F7E7CE] rounded-lg resize-none outline-none"
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -344,14 +344,14 @@ export default function ChatPage() {
                     {sending ? (
                         <button
                             onClick={stopGeneration}
-                            className="bg-red-600 px-4 py-2 rounded"
+                            className="bg-red-500 px-5 py-2 rounded-lg"
                         >
                             Stop
                         </button>
                     ) : (
                         <button
                             onClick={() => sendMessage()}
-                            className="bg-blue-600 px-4 py-2 rounded"
+                            className="bg-[#C9B08B] text-[#102C26] px-5 py-2 rounded-lg hover:opacity-90 transition"
                         >
                             Send
                         </button>

@@ -2,7 +2,7 @@
 
 :root {
     --bg-main: #102C26;
-    --bg-soft: #1A3F38;
+    --bg-surface: #1A3F38;
     --bg-hover: #214B42;
 
     --text-main: #F7E7CE;
@@ -15,4 +15,24 @@ body {
     background: var(--bg-main);
     color: var(--text-main);
     font-family: system-ui, -apple-system, sans-serif;
+}
+
+.app-shell {
+    max-width: 1400px;
+    margin: 20px auto;
+    height: calc(100vh - 40px);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+.typing-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
 }

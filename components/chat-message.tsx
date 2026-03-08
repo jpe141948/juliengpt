@@ -37,6 +37,10 @@ export default function ChatMessageBubble({
                         {message.content}
                     </ReactMarkdown>
 
+                    {message.content === "" && (
+                        <span className="typing-cursor">▌</span>
+                    )}
+
                     <div className="flex gap-3 mt-3 text-[#EAD9B7] opacity-60 hover:opacity-100 transition">
 
                         <Copy

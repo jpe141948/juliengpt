@@ -22,7 +22,12 @@ export async function POST(req: Request) {
         return new Response("Access denied", { status: 403 })
     }
 
-    const { messages, model, conversationId } = await req.json()
+    const formData = await req.formData()
+
+    const messages = JSON.parse(formData.get("messages") as string)
+    const model = formData.get("model") as string
+    const conversationId = formData.get("conversationId") as string
+    const files = formData.getAll("files") as File[]
 
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,12 +43,29 @@ export async function POST(req: Request) {
         role: m.role,
         content: m.content
     }))
+    const imageInputs = await Promise.all(
+        files.map(async (file) => {
+            const buffer = Buffer.from(await file.arrayBuffer())
+            const base64 = buffer.toString("base64")
+
+            return {
+                role: "user",
+                content: [
+                    {
+                        type: "input_image",
+                        image_base64: base64
+                    }
+                ]
+            }
+        })
+    )
 
     const response = await openai.responses.create({
         model: model || "gpt-5",
         input: [
             systemPrompt,
-            ...cleanMessages
+            ...cleanMessages,
+            ...imageInputs
         ],
         stream: true
     })

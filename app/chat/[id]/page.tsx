@@ -8,6 +8,7 @@ import { ChatMessage } from "@/types/chat"
 import { createClient } from "@/lib/supabase/client"
 import { v4 as uuid } from "uuid"
 import { Virtuoso } from "react-virtuoso"
+import { Paperclip } from "lucide-react"
 
 export default function ChatPage() {
 
@@ -28,6 +29,8 @@ export default function ChatPage() {
     const [initialSent, setInitialSent] = useState(false)
 
     const abortRef = useRef<AbortController | null>(null)
+
+    const [files, setFiles] = useState<File[]>([])
 
     useEffect(() => {
         loadMessages()
@@ -135,6 +138,7 @@ export default function ChatPage() {
 
         if (!customMessage) {
             setInput("")
+            setFiles([])
         }
 
         await supabase.from("messages").insert({
@@ -152,13 +156,19 @@ export default function ChatPage() {
 
         abortRef.current = new AbortController()
 
+        const formData = new FormData()
+
+        formData.append("messages", JSON.stringify(limitedHistory))
+        formData.append("model", model)
+        formData.append("conversationId", conversationId)
+
+        files.forEach(file => {
+            formData.append("files", file)
+        })
+
         const res = await fetch("/api/chat", {
             method: "POST",
-            body: JSON.stringify({
-                messages: limitedHistory,
-                model,
-                conversationId
-            }),
+            body: formData,
             signal: abortRef.current.signal
         })
 
@@ -317,6 +327,24 @@ export default function ChatPage() {
                             <option value="gpt-5">GPT-5</option>
                             <option value="gpt-5-mini">GPT-5 mini</option>
                         </select>
+
+                        <input
+                            type="file"
+                            multiple
+                            className="hidden"
+                            id="file-upload"
+                            onChange={(e) => {
+                                if (!e.target.files) return
+                                setFiles(Array.from(e.target.files))
+                            }}
+                        />
+
+                        <label
+                            htmlFor="file-upload"
+                            className="cursor-pointer text-[#F7E7CE] hover:opacity-70"
+                        >
+                            <Paperclip size={18} />
+                        </label>
 
                         <textarea
                             className="flex-1 bg-transparent text-[#F7E7CE] resize-none outline-none"

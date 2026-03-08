@@ -15,6 +15,7 @@ export default function ChatMessageBubble({
 }) {
 
     const isUser = message.role === "user"
+
     const [editing, setEditing] = useState(false)
     const [draft, setDraft] = useState(message.content)
 
@@ -43,11 +44,7 @@ export default function ChatMessageBubble({
 
                     <div className="flex gap-3 mt-3 text-[#EAD9B7] opacity-60 hover:opacity-100 transition">
 
-                        <Copy
-                            size={16}
-                            className="cursor-pointer"
-                            onClick={copy}
-                        />
+                        <Copy size={16} className="cursor-pointer" onClick={copy}/>
 
                         <RotateCcw
                             size={16}
@@ -69,9 +66,25 @@ export default function ChatMessageBubble({
 
             <div className="max-w-xl">
 
-                <div
-                    className={`px-4 py-3 rounded-xl bg-[#1A3F38] text-[#F7E7CE]`}
-                >
+                <div className="bg-[#1A3F38] text-[#F7E7CE] rounded-xl p-3">
+
+                    {message.attachments && message.attachments.length > 0 && (
+
+                        <div className="mb-3 flex gap-2 flex-wrap">
+
+                            {message.attachments.map((a: any, i: number) => (
+
+                                <img
+                                    key={i}
+                                    src={a.url}
+                                    className="w-32 rounded-lg"
+                                />
+
+                            ))}
+
+                        </div>
+
+                    )}
 
                     {editing ? (
                         <textarea
@@ -89,26 +102,14 @@ export default function ChatMessageBubble({
 
                 <div className="flex gap-3 mt-2 text-[#EAD9B7] opacity-60 hover:opacity-100 transition">
 
-                    <Copy
-                        size={16}
-                        className="cursor-pointer"
-                        onClick={copy}
-                    />
+                    <Copy size={16} className="cursor-pointer" onClick={copy}/>
 
                     {!editing && (
-                        <Pencil
-                            size={16}
-                            className="cursor-pointer"
-                            onClick={() => setEditing(true)}
-                        />
+                        <Pencil size={16} className="cursor-pointer" onClick={() => setEditing(true)}/>
                     )}
 
                     {editing && (
-                        <Check
-                            size={16}
-                            className="cursor-pointer"
-                            onClick={saveEdit}
-                        />
+                        <Check size={16} className="cursor-pointer" onClick={saveEdit}/>
                     )}
 
                 </div>

@@ -35,7 +35,7 @@ export default function ChatInput({
     }
 
     return (
-        <div className="border-t border-[#214B42] bg-[#1A3F38] py-6">
+
 
             <div className="max-w-3xl mx-auto px-4">
 
@@ -144,7 +144,5 @@ export default function ChatInput({
                 </div>
 
             </div>
-
-        </div>
     )
 }

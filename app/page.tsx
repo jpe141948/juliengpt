@@ -1,9 +1,10 @@
 "use client"
 
-import {useState, useMemo} from "react"
-import {createClient} from "@/lib/supabase/client"
-import {useRouter} from "next/navigation"
+import { useState, useMemo } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 import ChatSidebar from "@/components/chat-sidebar"
+import ChatInput from "@/components/chat-input"
 
 export default function HomePage() {
 
@@ -11,15 +12,17 @@ export default function HomePage() {
     const supabase = useMemo(() => createClient(), [])
 
     const [input, setInput] = useState("")
-    const [loading, setLoading] = useState(false)
+    const [model, setModel] = useState("gpt-5")
+    const [files, setFiles] = useState<File[]>([])
+    const [sending, setSending] = useState(false)
 
     async function startChat() {
 
         if (!input.trim()) return
-        setLoading(true)
+        setSending(true)
 
         const {
-            data: {user}
+            data: { user }
         } = await supabase.auth.getUser()
 
         if (!user) {
@@ -27,7 +30,7 @@ export default function HomePage() {
             return
         }
 
-        const {data, error} = await supabase
+        const { data, error } = await supabase
             .from("conversations")
             .insert({
                 user_id: user.id,
@@ -48,48 +51,28 @@ export default function HomePage() {
 
         <div className="app-shell flex">
 
-            <ChatSidebar/>
+            <ChatSidebar />
 
             <div className="flex-1 flex items-center justify-center bg-[#102C26]">
 
-                <div className="w-full max-w-xl">
+                <div className="w-full">
 
-                    <div className="flex items-center gap-3 bg-[#1A3F38] rounded-xl px-4 py-4">
-
-                        <select
-                            className="bg-transparent text-[#F7E7CE] text-sm outline-none"
-                        >
-                            <option>GPT-5</option>
-                            <option>GPT-5 mini</option>
-                        </select>
-
-                        <textarea
-                            className="flex-1 bg-transparent text-[#F7E7CE] resize-none outline-none"
-                            rows={1}
-                            value={input}
-                            placeholder="Ask anything..."
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault()
-                                    startChat()
-                                }
-                            }}
-                        />
-
-                        <button
-                            onClick={startChat}
-                            disabled={loading}
-                            className="bg-[#C9B08B] text-[#102C26] px-4 py-2 rounded-lg"
-                        >
-                            ↑
-                        </button>
-
-                    </div>
+                    <ChatInput
+                        input={input}
+                        setInput={setInput}
+                        model={model}
+                        setModel={setModel}
+                        files={files}
+                        setFiles={setFiles}
+                        sending={sending}
+                        onSend={startChat}
+                        onStop={() => {}}
+                    />
 
                 </div>
 
             </div>
+
         </div>
     )
 }

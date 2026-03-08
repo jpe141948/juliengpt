@@ -50,33 +50,42 @@ export default function HomePage() {
 
             <ChatSidebar/>
 
-            <div className="flex-1 flex items-center justify-center bg-zinc-950">
+            <div className="flex-1 flex items-center justify-center bg-[#102C26]">
 
-                <div className="w-full max-w-xl flex flex-col gap-4">
+                <div className="w-full max-w-xl">
 
-                <textarea
-                    className="w-full p-4 bg-zinc-800 rounded resize-none"
-                    rows={2}
-                    value={input}
-                    placeholder="Ask anything..."
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
+                    <div className="flex items-center gap-3 bg-[#1A3F38] rounded-xl px-4 py-4">
 
-                        if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault()
-                            startChat()
-                        }
+                        <select
+                            className="bg-transparent text-[#F7E7CE] text-sm outline-none"
+                        >
+                            <option>GPT-5</option>
+                            <option>GPT-5 mini</option>
+                        </select>
 
-                    }}
-                />
+                        <textarea
+                            className="flex-1 bg-transparent text-[#F7E7CE] resize-none outline-none"
+                            rows={1}
+                            value={input}
+                            placeholder="Ask anything..."
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault()
+                                    startChat()
+                                }
+                            }}
+                        />
 
-                    <button
-                        onClick={startChat}
-                        disabled={loading}
-                        className="bg-blue-600 p-3 rounded disabled:opacity-50"
-                    >
-                        Start Chat
-                    </button>
+                        <button
+                            onClick={startChat}
+                            disabled={loading}
+                            className="bg-[#C9B08B] text-[#102C26] px-4 py-2 rounded-lg"
+                        >
+                            ↑
+                        </button>
+
+                    </div>
 
                 </div>
 

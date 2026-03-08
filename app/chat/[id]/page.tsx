@@ -283,27 +283,7 @@ export default function ChatPage() {
 
             <div className="flex flex-col flex-1">
 
-                <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-
-                    <select
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                        className="bg-zinc-800 px-3 py-2 rounded"
-                    >
-                        <option value="gpt-5">GPT-5</option>
-                        <option value="gpt-5-mini">GPT-5-mini</option>
-                    </select>
-
-                    {sending && (
-                        <button
-                            onClick={stopGeneration}
-                            className="bg-red-600 px-3 py-2 rounded"
-                        >
-                            Stop
-                        </button>
-                    )}
-
-                </div>
+                <div className="p-4 border-b border-[#214B42]" />
 
                 <div className="flex-1 px-10 py-8 overflow-hidden">
 
@@ -325,37 +305,50 @@ export default function ChatPage() {
 
                 </div>
 
-                <div className="border-t border-[#214B42] bg-[#1A3F38] p-5 flex gap-3">
+                <div className="border-t border-[#214B42] bg-[#1A3F38] p-5">
 
-          <textarea
-              className="flex-1 p-3 bg-[#214B42] text-[#F7E7CE] rounded-lg resize-none outline-none"
-              rows={1}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Send a message..."
-              onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      sendMessage()
-                  }
-              }}
-          />
+                    <div className="flex items-center gap-3 bg-[#214B42] rounded-xl px-4 py-3">
 
-                    {sending ? (
-                        <button
-                            onClick={stopGeneration}
-                            className="bg-red-500 px-5 py-2 rounded-lg"
+                        <select
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            className="bg-transparent text-[#F7E7CE] text-sm outline-none"
                         >
-                            Stop
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => sendMessage()}
-                            className="bg-[#C9B08B] text-[#102C26] px-5 py-2 rounded-lg hover:opacity-90 transition"
-                        >
-                            Send
-                        </button>
-                    )}
+                            <option value="gpt-5">GPT-5</option>
+                            <option value="gpt-5-mini">GPT-5 mini</option>
+                        </select>
+
+                        <textarea
+                            className="flex-1 bg-transparent text-[#F7E7CE] resize-none outline-none"
+                            rows={1}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Type your message..."
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault()
+                                    sendMessage()
+                                }
+                            }}
+                        />
+
+                        {sending ? (
+                            <button
+                                onClick={stopGeneration}
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                            >
+                                Stop
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => sendMessage()}
+                                className="bg-[#C9B08B] text-[#102C26] px-4 py-2 rounded-lg hover:opacity-90"
+                            >
+                                ↑
+                            </button>
+                        )}
+
+                    </div>
 
                 </div>
 

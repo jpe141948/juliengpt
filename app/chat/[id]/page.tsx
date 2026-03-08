@@ -131,9 +131,33 @@ export default function ChatPage() {
 
         const userMessage = messageToSend
 
-        const attachments = files.map(file => ({
-            url: URL.createObjectURL(file)
-        }))
+        const uploadedAttachments = []
+
+        for (const file of files) {
+
+            const path = `${conversationId}/${uuid()}-${file.name}`
+
+            const { error } = await supabase
+                .storage
+                .from("chat-files")
+                .upload(path, file)
+
+            if (error) {
+                console.error(error)
+                continue
+            }
+
+            const { data } = supabase
+                .storage
+                .from("chat-files")
+                .getPublicUrl(path)
+
+            uploadedAttachments.push({
+                url: data.publicUrl,
+                type: file.type,
+                name: file.name
+            })
+        }
 
         const newMessages: ChatMessage[] = [
             ...messages,
@@ -141,7 +165,7 @@ export default function ChatPage() {
                 id: uuid(),
                 role: "user",
                 content: userMessage,
-                attachments
+                attachments: uploadedAttachments
             }
         ]
 
@@ -155,7 +179,8 @@ export default function ChatPage() {
         await supabase.from("messages").insert({
             conversation_id: conversationId,
             role: "user",
-            content: userMessage
+            content: userMessage,
+            attachments: uploadedAttachments
         })
 
         const history = [
@@ -167,19 +192,13 @@ export default function ChatPage() {
 
         abortRef.current = new AbortController()
 
-        const formData = new FormData()
-
-        formData.append("messages", JSON.stringify(limitedHistory))
-        formData.append("model", model)
-        formData.append("conversationId", conversationId)
-
-        files.forEach(file => {
-            formData.append("files", file)
-        })
-
         const res = await fetch("/api/chat", {
             method: "POST",
-            body: formData,
+            body: JSON.stringify({
+                messages: limitedHistory,
+                model,
+                conversationId
+            }),
             signal: abortRef.current.signal
         })
 

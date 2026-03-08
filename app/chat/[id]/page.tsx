@@ -125,7 +125,7 @@ export default function ChatPage() {
 
         const messageToSend = customMessage ?? input
 
-        if (!messageToSend.trim() || sending) return
+        if ((!messageToSend.trim() && files.length === 0) || sending) return
 
         setSending(true)
 
@@ -192,13 +192,19 @@ export default function ChatPage() {
 
         abortRef.current = new AbortController()
 
+        const formData = new FormData()
+
+        formData.append("messages", JSON.stringify(limitedHistory))
+        formData.append("model", model)
+        formData.append("conversationId", conversationId)
+
+        files.forEach(file => {
+            formData.append("files", file)
+        })
+
         const res = await fetch("/api/chat", {
             method: "POST",
-            body: JSON.stringify({
-                messages: limitedHistory,
-                model,
-                conversationId
-            }),
+            body: formData,
             signal: abortRef.current.signal
         })
 
